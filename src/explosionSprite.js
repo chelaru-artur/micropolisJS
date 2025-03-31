@@ -29,7 +29,7 @@ function ExplosionSprite(map, spriteManager, x, y) {
 BaseSprite(ExplosionSprite);
 
 
-ExplosionSprite.prototype.startFire = function(x, y) {
+ExplosionSprite.prototype.startFire = function (x, y) {
   x = this.worldX;
   y = this.worldY;
 
@@ -49,14 +49,14 @@ ExplosionSprite.prototype.startFire = function(x, y) {
 };
 
 
-ExplosionSprite.prototype.move = function(spriteCycle, disasterManager, blockMaps) {
+ExplosionSprite.prototype.move = function (spriteCycle, disasterManager, blockMaps) {
   if ((spriteCycle & 1) === 0) {
     if (this.frame === 1) {
       // Convert sprite coordinates to tile coordinates.
       var explosionX = this.worldX;
       var explosionY = this.worldY;
       this._emitEvent(SOUND_EXPLOSIONHIGH);
-      this._emitEvent(EXPLOSION_REPORTED, {x: explosionX, y: explosionY});
+      this._emitEvent(EXPLOSION_REPORTED, { x: explosionX, y: explosionY });
     }
 
     this.frame++;
@@ -76,9 +76,11 @@ ExplosionSprite.prototype.move = function(spriteCycle, disasterManager, blockMap
 
 // Metadata for image loading
 Object.defineProperties(ExplosionSprite,
-  {ID: MiscUtils.makeConstantDescriptor(7),
-   width: MiscUtils.makeConstantDescriptor(48),
-   frames: MiscUtils.makeConstantDescriptor(6)});
+  {
+    ID: MiscUtils.makeConstantDescriptor(7),
+    width: MiscUtils.makeConstantDescriptor(48),
+    frames: MiscUtils.makeConstantDescriptor(6)
+  });
 
 
 export { ExplosionSprite };

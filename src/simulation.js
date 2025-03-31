@@ -40,7 +40,7 @@ var Simulation = EventEmitter(function (gameMap, gameLevel, speed, savedGame) {
   this._simCycle = 0;
   this._cityTime = 0;
   this._cityPopLast = 0;
-  this._messageLast = Messages.VILLAGE_REACHED;
+  this._messageLast = Messages.REACHED_VILLAGE;
   this._startingYear = 1900;
 
   // Last date sent to front end
@@ -118,35 +118,35 @@ var Simulation = EventEmitter(function (gameMap, gameLevel, speed, savedGame) {
 });
 
 
-Simulation.prototype.setLevel = function(l) {
+Simulation.prototype.setLevel = function (l) {
   if (l !== Simulation.LEVEL_EASY &&
-      l !== Simulation.LEVEL_MED &&
-      l !== Simulation.LEVEL_HARD)
+    l !== Simulation.LEVEL_MED &&
+    l !== Simulation.LEVEL_HARD)
     throw new Error('Invalid level!');
 
   this._gameLevel = l;
 };
 
 
-Simulation.prototype.setSpeed = function(s) {
+Simulation.prototype.setSpeed = function (s) {
   if (s !== Simulation.SPEED_PAUSED &&
-      s !== Simulation.SPEED_SLOW &&
-      s !== Simulation.SPEED_MED &&
-      s !== Simulation.SPEED_FAST)
+    s !== Simulation.SPEED_SLOW &&
+    s !== Simulation.SPEED_MED &&
+    s !== Simulation.SPEED_FAST)
     throw new Error('Invalid speed!');
 
   this._speed = s;
 };
 
 
-Simulation.prototype.isPaused = function() {
+Simulation.prototype.isPaused = function () {
   return this._speed === Simulation.SPEED_PAUSED;
 };
 
 
 var saveProps = ['_cityTime', '_speed', '_gameLevel'];
 
-Simulation.prototype.save = function(saveData) {
+Simulation.prototype.save = function (saveData) {
   for (var i = 0, l = saveProps.length; i < l; i++)
     saveData[saveProps[i]] = this[saveProps[i]];
 
@@ -158,7 +158,7 @@ Simulation.prototype.save = function(saveData) {
 };
 
 
-Simulation.prototype.load = function(saveData) {
+Simulation.prototype.load = function (saveData) {
   for (var i = 0, l = saveProps.length; i < l; i++)
     this[saveProps[i]] = saveData[saveProps[i]];
 
@@ -170,14 +170,14 @@ Simulation.prototype.load = function(saveData) {
 };
 
 
-Simulation.prototype.simTick = function() {
+Simulation.prototype.simTick = function () {
   this._simFrame();
   this._updateTime();
   // TODO Graphs
 };
 
 
-Simulation.prototype._simFrame = function() {
+Simulation.prototype._simFrame = function () {
   if (this.budget.awaitingValues)
     return;
 
@@ -201,7 +201,7 @@ Simulation.prototype._simFrame = function() {
       break;
 
     default:
-      console.warn('Unexpected speed ('  + this._speed + '): defaulting to slow');
+      console.warn('Unexpected speed (' + this._speed + '): defaulting to slow');
   }
 
   var d = new Date();
@@ -214,7 +214,7 @@ Simulation.prototype._simFrame = function() {
 };
 
 
-Simulation.prototype._clearCensus = function() {
+Simulation.prototype._clearCensus = function () {
   this._census.clearCensus();
   this._powerManager.clearPowerStack();
   this.blockMaps.fireStationMap.clear();
@@ -222,7 +222,7 @@ Simulation.prototype._clearCensus = function() {
 };
 
 
-Simulation.prototype._constructSimData = function() {
+Simulation.prototype._constructSimData = function () {
   return {
     blockMaps: this.blockMaps,
     budget: this.budget,
@@ -240,21 +240,21 @@ Simulation.prototype._constructSimData = function() {
 };
 
 
-Simulation.prototype.init = function() {
+Simulation.prototype.init = function () {
   this._lastTickTime = -1;
 
   // Add various listeners that we will in turn transmit upwards
-  var evaluationEvents = ['CLASSIFICATION_UPDATED', 'POPULATION_UPDATED', 'SCORE_UPDATED'].map(function(m) {
+  var evaluationEvents = ['CLASSIFICATION_UPDATED', 'POPULATION_UPDATED', 'SCORE_UPDATED'].map(function (m) {
     return Messages[m];
   });
   for (var i = 0, l = evaluationEvents.length; i < l; i++)
     this.evaluation.addEventListener(evaluationEvents[i], MiscUtils.reflectEvent.bind(this, evaluationEvents[i]));
 
-  this._powerManager.addEventListener(Messages.NOT_ENOUGH_POWER, function(e) {
+  this._powerManager.addEventListener(Messages.NOT_ENOUGH_POWER, function (e) {
     var d = new Date();
 
     if (this._lastPowerMessage === null || d - this._lastPowerMessage > 1000 * 60 * 2) {
-      this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NOT_ENOUGH_POWER});
+      this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NOT_ENOUGH_POWER });
       this._lastPowerMessage = d;
     }
   }.bind(this));
@@ -298,21 +298,21 @@ Simulation.prototype.init = function() {
 var speedPowerScan = [2, 4, 5];
 var speedPollutionTerrainLandValueScan = [2, 7, 17];
 var speedCrimeScan = [1, 8, 18];
-var speedPopulationDensityScan = [1, 9,19];
+var speedPopulationDensityScan = [1, 9, 19];
 var speedFireAnalysis = [1, 10, 20];
 var CENSUS_FREQUENCY_10 = 4;
 var CENSUS_FREQUENCY_120 = CENSUS_FREQUENCY_10 * 10;
 var TAX_FREQUENCY = 48;
 
 
-var simulate = function(simData) {
+var simulate = function (simData) {
   this._phaseCycle &= 15;
   var speedIndex = this._speed - 1;
 
-  switch (this._phaseCycle)  {
+  switch (this._phaseCycle) {
     case 0:
       if (++this._simCycle > 1023)
-          this._simCycle = 0;
+        this._simCycle = 0;
 
       this._cityTime++;
 
@@ -331,7 +331,7 @@ var simulate = function(simData) {
     case 7:
     case 8:
       this._mapScanner.mapScan((this._phaseCycle - 1) * this._map.width / 8,
-                                this._phaseCycle * this._map.width / 8, simData);
+        this._phaseCycle * this._map.width / 8, simData);
       break;
 
     case 9:
@@ -341,7 +341,7 @@ var simulate = function(simData) {
       if (this._cityTime % CENSUS_FREQUENCY_120 === 0)
         this._census.take120Census(budget);
 
-      if (this._cityTime % TAX_FREQUENCY === 0)  {
+      if (this._cityTime % TAX_FREQUENCY === 0) {
         this.budget.collectTax(this._gameLevel, this._census);
         this.evaluation.cityEvaluation(simData);
       }
@@ -389,7 +389,7 @@ var simulate = function(simData) {
 };
 
 
-Simulation.prototype._simulate = function(simData) {
+Simulation.prototype._simulate = function (simData) {
   // This is actually a wrapper function that will only be called once, to perform the initial
   // evaluation. Once that has completed, it will supplant itself with the standard "simulate"
   // procedure defined above
@@ -399,52 +399,52 @@ Simulation.prototype._simulate = function(simData) {
 };
 
 
-Simulation.prototype._wrapMessage = function(message, data) {
-  this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: message, data: data});
+Simulation.prototype._wrapMessage = function (message, data) {
+  this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: message, data: data });
 };
 
 
-Simulation.prototype._sendMessages = function() {
+Simulation.prototype._sendMessages = function () {
   this._checkGrowth();
 
   var totalZonePop = this._census.resZonePop + this._census.comZonePop +
-                     this._census.indZonePop;
+    this._census.indZonePop;
   var powerPop = this._census.nuclearPowerPop + this._census.coalPowerPop;
 
   switch (this._cityTime & 63) {
     case 1:
       if (Math.floor(totalZonePop / 4) >= this._census.resZonePop)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_MORE_RESIDENTIAL});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_MORE_RESIDENTIAL });
       break;
 
     case 5:
       if (Math.floor(totalZonePop / 8) >= this._census.comZonePop)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_MORE_COMMERCIAL});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_MORE_COMMERCIAL });
       break;
 
     case 10:
       if (Math.floor(totalZonePop / 8) >= this._census.indZonePop)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_MORE_INDUSTRIAL});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_MORE_INDUSTRIAL });
       break;
 
     case 14:
       if (totalZonePop > 10 && totalZonePop * 2 > this._census.roadTotal)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_MORE_ROADS});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_MORE_ROADS });
       break;
 
     case 18:
       if (totalZonePop > 50 && totalZonePop > this._census.railTotal)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_MORE_RAILS});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_MORE_RAILS });
       break;
 
     case 22:
       if (totalZonePop > 10 && powerPop === 0)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_ELECTRICITY});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_ELECTRICITY });
       break;
 
     case 26:
       if (this._census.resPop > 500 && this._census.stadiumPop === 0) {
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_STADIUM});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_STADIUM });
         this._valves.resCap = true;
       } else {
         this._valves.resCap = false;
@@ -453,7 +453,7 @@ Simulation.prototype._sendMessages = function() {
 
     case 28:
       if (this._census.indPop > 70 && this._census.seaportPop === 0) {
-          this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_SEAPORT});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_SEAPORT });
         this._valves.indCap = true;
       } else {
         this._valves.indCap = false;
@@ -462,7 +462,7 @@ Simulation.prototype._sendMessages = function() {
 
     case 30:
       if (this._census.comPop > 100 && this._census.airportPop === 0) {
-          this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages._NEED_AIRPORT});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_AIRPORT });
         this._valves.comCap = true;
       } else {
         this._valves.comCap = false;
@@ -475,7 +475,7 @@ Simulation.prototype._sendMessages = function() {
         if (this._census.poweredZoneCount / zoneCount < 0.7 && powerPop > 0) {
           var d = new Date();
           if (this._lastPowerMessage === null || d - this._lastPowerMessage > 1000 * 60 * 2) {
-            this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.BLACKOUTS_REPORTED});
+            this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.BLACKOUTS_REPORTED });
             this._lastPowerMessage = d;
           }
         }
@@ -485,53 +485,53 @@ Simulation.prototype._sendMessages = function() {
     case 35:
       if (this._census.pollutionAverage > 60)
         this._emitEvent(Messages.FRONT_END_MESSAGE,
-                       {subject: Messages.HIGH_POLLUTION, data: {x: this._map.pollutionMaxX, y: this._map.pollutionMaxY}});
+          { subject: Messages.HIGH_POLLUTION, data: { x: this._map.pollutionMaxX, y: this._map.pollutionMaxY } });
       break;
 
     case 42:
       if (this._census.crimeAverage > 100)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.HIGH_CRIME});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.HIGH_CRIME });
       break;
 
     case 45:
       if (this._census.totalPop > 60 && this._census.fireStationPop === 0)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_FIRE_STATION});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_FIRE_STATION });
       break;
 
     case 48:
       if (this._census.totalPop > 60 && this._census.policeStationPop === 0)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.NEED_POLICE_STATION});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.NEED_POLICE_STATION });
       break;
 
     case 51:
       if (this.budget.cityTax > 12)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.TAX_TOO_HIGH});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.TAX_TOO_HIGH });
       break;
 
     case 54:
       if (this.budget.roadEffect < Math.floor(5 * this.budget.MAX_ROAD_EFFECT / 8) && this._census.roadTotal > 30)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.ROAD_NEEDS_FUNDING});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.ROAD_NEEDS_FUNDING });
       break;
 
     case 57:
       if (this.budget.fireEffect < Math.floor(7 * this.budget.MAX_FIRE_STATION_EFFECT / 10) && this._census.totalPop > 20)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.FIRE_STATION_NEEDS_FUNDING});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.FIRE_STATION_NEEDS_FUNDING });
       break;
 
     case 60:
       if (this.budget.policeEffect < Math.floor(7 * this.budget.MAX_POLICE_STATION_EFFECT / 10) && this._census.totalPop > 20)
-        this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.POLICE_NEEDS_FUNDING});
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.POLICE_NEEDS_FUNDING });
       break;
 
-  case 63:
-    if (this._census.trafficAverage > 60)
-      this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: Messages.TRAFFIC_JAMS});
-    break;
+    case 63:
+      if (this._census.trafficAverage > 60)
+        this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: Messages.TRAFFIC_JAMS });
+      break;
   }
 };
 
 
-Simulation.prototype._checkGrowth = function() {
+Simulation.prototype._checkGrowth = function () {
   if ((this._cityTime & 3) !== 0)
     return;
 
@@ -558,7 +558,7 @@ Simulation.prototype._checkGrowth = function() {
 
         case Evaluation.CC_CAPITAL:
           message = Messages.REACHED_CAPITAL;
-            break;
+          break;
 
         case Evaluation.CC_METROPOLIS:
           message = Messages.REACHED_METROPOLIS;
@@ -575,7 +575,7 @@ Simulation.prototype._checkGrowth = function() {
   }
 
   if (message !== '' && message !== this._messageLast) {
-    this._emitEvent(Messages.FRONT_END_MESSAGE, {subject: message});
+    this._emitEvent(Messages.FRONT_END_MESSAGE, { subject: message });
     this._messageLast = message;
   }
 
@@ -583,25 +583,27 @@ Simulation.prototype._checkGrowth = function() {
 };
 
 
-Simulation.prototype._onValveChange  = function() {
+Simulation.prototype._onValveChange = function () {
   this._resLast = this._valves.resValve;
   this._comLast = this._valves.comValve;
   this._indLast = this._valves.indValve;
 
-  this._emitEvent(Messages.VALVES_UPDATED, {residential: this._valves.resValve,
-                                            commercial: this._valves.comValve,
-                                            industrial: this._valves.indValve});
+  this._emitEvent(Messages.VALVES_UPDATED, {
+    residential: this._valves.resValve,
+    commercial: this._valves.comValve,
+    industrial: this._valves.indValve
+  });
 };
 
 
-Simulation.prototype.getDate = function() {
+Simulation.prototype.getDate = function () {
   var year = Math.floor(this._cityTime / 48) + this._startingYear;
   var month = Math.floor(this._cityTime % 48) >> 2;
-  return {month: month, year: year};
+  return { month: month, year: year };
 };
 
 
-Simulation.prototype._setYear = function(year) {
+Simulation.prototype._setYear = function (year) {
   if (year < this._startingYear)
     year = this._startingYear;
 
@@ -611,7 +613,7 @@ Simulation.prototype._setYear = function(year) {
 };
 
 
-Simulation.prototype._updateTime = function() {
+Simulation.prototype._updateTime = function () {
   var megalinium = 1000000;
   var cityYear = Math.floor(this._cityTime / 48) + this._startingYear;
   var cityMonth = Math.floor(this._cityTime % 48) >> 2;
@@ -624,20 +626,21 @@ Simulation.prototype._updateTime = function() {
   if (this._cityYearLast !== cityYear || this._cityMonthLast !== cityMonth) {
     this._cityYearLast = cityYear;
     this._cityMonthLast = cityMonth;
-    this._emitEvent(Messages.DATE_UPDATED, {month: cityMonth, year: cityYear});
+    this._emitEvent(Messages.DATE_UPDATED, { month: cityMonth, year: cityYear });
   }
 };
 
 
 Object.defineProperties(Simulation,
-  {LEVEL_EASY: MiscUtils.makeConstantDescriptor(0),
-  LEVEL_MED:  MiscUtils.makeConstantDescriptor(1),
-  LEVEL_HARD: MiscUtils.makeConstantDescriptor(2),
-  SPEED_PAUSED: MiscUtils.makeConstantDescriptor(0),
-  SPEED_SLOW:  MiscUtils.makeConstantDescriptor(1),
-  SPEED_MED: MiscUtils.makeConstantDescriptor(2),
-  SPEED_FAST: MiscUtils.makeConstantDescriptor(3),
-});
+  {
+    LEVEL_EASY: MiscUtils.makeConstantDescriptor(0),
+    LEVEL_MED: MiscUtils.makeConstantDescriptor(1),
+    LEVEL_HARD: MiscUtils.makeConstantDescriptor(2),
+    SPEED_PAUSED: MiscUtils.makeConstantDescriptor(0),
+    SPEED_SLOW: MiscUtils.makeConstantDescriptor(1),
+    SPEED_MED: MiscUtils.makeConstantDescriptor(2),
+    SPEED_FAST: MiscUtils.makeConstantDescriptor(3),
+  });
 
 
 export { Simulation };

@@ -11,7 +11,7 @@ import { BaseSprite } from './baseSprite';
 import { SPRITE_DYING, SPRITE_MOVED } from './messages';
 import { MiscUtils } from './miscUtils';
 import { Random } from './random';
-import { SpriteConstants } from './spriteConstants';
+import * as SpriteConstants from './spriteConstants';
 import { SpriteUtils } from './spriteUtils';
 
 function TornadoSprite(map, spriteManager, x, y) {
@@ -31,7 +31,7 @@ BaseSprite(TornadoSprite);
 var xDelta = [2, 3, 2, 0, -2, -3];
 var yDelta = [-2, 0, 2, 3, 2, 0];
 
-TornadoSprite.prototype.move = function(spriteCycle, disasterManager, blockMaps) {
+TornadoSprite.prototype.move = function (spriteCycle, disasterManager, blockMaps) {
   var frame = this.frame;
 
   // If middle frame, move right or left
@@ -63,8 +63,8 @@ TornadoSprite.prototype.move = function(spriteCycle, disasterManager, blockMaps)
 
     // Explode vulnerable sprites
     if (s.frame !== 0 &&
-        (s.type === SpriteConstants.SPRITE_AIRPLANE || s.type === SpriteConstants.SPRITE_HELICOPTER ||
-         s.type === SpriteConstants.SPRITE_SHIP || s.type === SpriteConstants.SPRITE_TRAIN) &&
+      (s.type === SpriteConstants.SPRITE_AIRPLANE || s.type === SpriteConstants.SPRITE_HELICOPTER ||
+        s.type === SpriteConstants.SPRITE_SHIP || s.type === SpriteConstants.SPRITE_TRAIN) &&
       SpriteUtils.checkSpriteCollision(this, s)) {
       s.explodeSprite();
     }
@@ -84,15 +84,17 @@ TornadoSprite.prototype.move = function(spriteCycle, disasterManager, blockMaps)
     this._emitEvent(SPRITE_DYING);
 
   SpriteUtils.destroyMapTile(this.spriteManager, this.map, blockMaps, this.x, this.y);
-  this._emitEvent(SPRITE_MOVED, {x: this.worldX, y: this.worldY});
+  this._emitEvent(SPRITE_MOVED, { x: this.worldX, y: this.worldY });
 };
 
 
 // Metadata for image loading
 Object.defineProperties(TornadoSprite,
-  {ID: MiscUtils.makeConstantDescriptor(6),
-   width: MiscUtils.makeConstantDescriptor(48),
-   frames: MiscUtils.makeConstantDescriptor(3)});
+  {
+    ID: MiscUtils.makeConstantDescriptor(6),
+    width: MiscUtils.makeConstantDescriptor(48),
+    frames: MiscUtils.makeConstantDescriptor(3)
+  });
 
 
 export { TornadoSprite };
